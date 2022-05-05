@@ -35,4 +35,29 @@ app.post("/api/login", (req, res) => {
     : res.status(400).json("Incorrect username or password");
 });
 
+const verify = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    jwt.verify(token, "mySecretKey", (err, user) => {
+      if (err) {
+        return res.status(403).json("Invalid Token");
+      }
+
+      req.user = user;
+      next();
+    });
+  } else {
+    res.status(401).json("You are not Authenticated");
+  }
+};
+
+app.delete("/api/users/:userId", verify, (req, res) => {
+  if (req.user.id === req.params.userId || req.user.isAdmin) {
+    res.status(200).json("User has been deleted");
+  } else {
+    res.status(401).json("Not Allowed");
+  }
+});
+
 app.listen(5000, () => console.log("Server Run on Port : 5000"));
