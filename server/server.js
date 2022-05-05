@@ -106,4 +106,10 @@ app.delete("/api/users/:userId", verify, (req, res) => {
   }
 });
 
+app.post("/api/logout", verify, (req, res) => {
+  const refreshToken = req.body.token;
+  refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+  res.status(200).json("Logout Successfully");
+});
+
 app.listen(5000, () => console.log("Server Run on Port : 5000"));
