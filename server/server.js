@@ -19,20 +19,66 @@ const users = [
   },
 ];
 
+let refreshTokens = [];
+
+app.post("/api/refresh", (req, res) => {
+  // take refresh token from user
+  const refreshToken = req.body.token;
+
+  // send error igf token is invalid
+  if (!refreshToken) return res.status(401).json("You are not Authenticated");
+  if (!refreshTokens.includes(refreshToken)) {
+    return res.status(403).json("Invalid refresh token");
+  }
+
+  // if token is valid => create new access token => refresh token => send to user
+  jwt.verify(refreshToken, "myRefreshSecretKey", (err, user) => {
+    err && console.log(err);
+    refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+
+    const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+
+    refreshTokens.push(newRefreshToken);
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  });
+});
+
+const generateAccessToken = (user) => {
+  return jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "mySecretKey", {
+    expiresIn: "15m",
+  });
+};
+
+const generateRefreshToken = (user) => {
+  return jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "myRefreshSecretKey");
+};
+
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   const user = users.find((u) => {
     return u.username === username && u.password === password;
   });
 
-  const accessToken = jwt.sign(
-    { id: user.id, isAdmin: user.isAdmin },
-    "mySecretKey"
-  );
+  if (user) {
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-  user
-    ? res.json({ username: user.username, isAdmin: user.isAdmin, accessToken })
-    : res.status(400).json("Incorrect username or password");
+    refreshTokens.push(refreshToken);
+
+    res.json({
+      username: user.username,
+      isAdmin: user.isAdmin,
+      accessToken,
+      refreshToken,
+    });
+  } else {
+    res.status(400).json("Incorrect username or password");
+  }
 });
 
 const verify = (req, res, next) => {
