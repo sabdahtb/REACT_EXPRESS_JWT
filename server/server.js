@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const app = express();
 app.use(express.json());
 
+require("dotenv").config();
+PORT = process.env.PORT || 5000;
+
 const users = [
   {
     id: "1",
@@ -112,4 +115,4 @@ app.post("/api/logout", verify, (req, res) => {
   res.status(200).json("Logout Successfully");
 });
 
-app.listen(5000, () => console.log("Server Run on Port : 5000"));
+app.listen(PORT, () => console.log("Server Run on Port : " + PORT));
