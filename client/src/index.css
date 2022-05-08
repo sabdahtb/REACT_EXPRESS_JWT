@@ -25,3 +25,19 @@
 .logout{
   @apply text-red-400 cursor-pointer font-semibold hover:text-red-600 hover:duration-300 ease-in-out
 }
+
+.btn-del{
+ @apply bg-red-500 text-white w-full rounded-sm p-2 mt-1 font-semibold hover:bg-red-700 hover:ease-in-out hover:duration-300
+}
+
+.merah{
+  @apply text-red-500 capitalize
+}
+
+.error{
+  @apply text-sm text-red-500 font-semibold
+}
+
+.success{
+  @apply text-sm text-green-500 font-semibold
+}
